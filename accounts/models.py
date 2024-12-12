@@ -17,6 +17,7 @@ class AccountManager(BaseUserManager):
         """Create and return a superuser."""
         user = self.create_user(email, full_name, phone, password)
         user.is_admin = True
+        user.is_staff = True
         user.save(using=self._db)
         return user
 
@@ -36,9 +37,10 @@ class Account(AbstractBaseUser):
     balance = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
 
     # Authentication and permissions
-    password = models.CharField(max_length=255)  # This is redundant but left for backward compatibility.
+    password = models.CharField(max_length=255)  
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False) 
 
     # Metadata
     USERNAME_FIELD = 'email'

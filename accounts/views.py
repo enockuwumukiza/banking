@@ -11,25 +11,23 @@ from .models import Account,Transaction
 
 def new_account(request):
     if request.method == 'POST':
-        # Get data from the form
         full_name = request.POST.get('full_name')
         email = request.POST.get('email')
-        account_type = request.POST.get('account_type')  # You might use this for categorizing the user
+        account_type = request.POST.get('account_type')
         phone = request.POST.get('phone')
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
         
-        # Check if passwords match
+        
         if password != confirm_password:
             messages.error(request, 'Passwords do not match')
             return redirect('account') 
 
-        # Check if email already exists
+        
         if Account.objects.filter(email=email).exists():
             messages.error(request, 'Email already registered')
-            return redirect('new_account')
+            return redirect('account')
 
-        # Create the user account
         account = Account.objects.create_user(
             email=email, 
             full_name=full_name, 
@@ -40,9 +38,9 @@ def new_account(request):
         login(request, account)
         
         messages.success(request, 'Account created successfully!')
-        return redirect('dashboard')  # Redirect to the dashboard or another page after successful registration
+        return redirect('dashboard') 
 
-    return render(request, 'account.html')  # The page where the form is displayed
+    return render(request, 'account.html') 
 
 def home(request):
     return render(request, 'home.html')
@@ -56,7 +54,7 @@ def user_logout(request):
 def dashboard(request):
     if request.user.is_authenticated:
         user_account = request.user
-        user_account.refresh_from_db()  # Refresh to get the latest data from the database
+        user_account.refresh_from_db()  
         user_name = user_account.full_name
         balance = user_account.balance
         
@@ -76,7 +74,7 @@ def deposit(request):
             messages.error(request, 'Invalid deposit amount')
             return redirect('dashboard')
         
-        # Assuming the user is logged in
+       
         user_account = request.user
 
         # Update the balance
@@ -95,18 +93,18 @@ def withdraw(request):
     if request.method == 'POST':
         amount = request.POST.get('amount')
         
-        # Check if the amount is valid (greater than zero and not empty)
+        # Check if the amount is valid 
         if not amount or Decimal(amount) <= 0:
             messages.error(request, 'Invalid withdrawal amount')
-            return redirect('withdraw')  # Stay on the withdrawal page if the amount is invalid
+            return redirect('withdraw')  
         
-        # Assuming the user is logged in
+        
         user_account = request.user
 
-        # Check if the account has sufficient balance
+        
         if user_account.balance < Decimal(amount):
             messages.error(request, f'Insufficient balance -- your balance is ${user_account.balance}')
-            return redirect('withdraw')  # Stay on the withdrawal page if the balance is insufficient
+            return redirect('withdraw')  
         
         # Update the balance
         user_account.balance -= Decimal(amount)
